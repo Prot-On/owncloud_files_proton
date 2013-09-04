@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<info>
+	<id>files_proton</id>
+	<name>ProtOn Files</name>
+	<description>ProtOn integration in files</description>
+	<version>0.1</version>
+	<licence>AGPL</licence>
+	<author>Proteccion Online, SL - info@prot-on.com</author>
+	<require>5</require>
+</info>

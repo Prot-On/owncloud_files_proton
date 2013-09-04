@@ -1,0 +1,47 @@
+unprotected : .*(?<!\.proton\.)(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff)
+----------------------------------------------------------
+paquito.docx
+paquito.xlsx
+paquito.pptx
+paquito.pdf
+paquito.jpg
+paquito.png
+paquito.gif
+paquito.bmp
+paquito.tiff
+paquito.html
+paquito.htm
+paquito.txt
+
+
+
+protected+dnd : .*(\.proton\.)(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff)
+----------------------------------------------------------
+paquito.proton.docx
+paquito.proton.xlsx
+paquito.proton.pptx
+paquito.proton.pdf
+paquito.proton.jpg
+paquito.proton.png
+paquito.proton.gif
+paquito.proton.bmp
+paquito.proton.tiff
+
+
+
+protected : .*(\.proton\.).+
+----------------------------------------------------------
+paquito.proton.html
+paquito.proton.htm
+paquito.proton.txt
+
+
+
+unsupported : resto
+----------------------------------------------------------
+paquito.psd
+paquito.mm
+paquito.zip
+
+
+
