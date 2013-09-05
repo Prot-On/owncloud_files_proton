@@ -26,7 +26,7 @@
     return false;
 }
 
-include_once 'common/includes.php'; 
+include_once 'apps/files_proton/common/includes.php';
  
 OCP\App::registerAdmin( 'files_proton', 'settings' );
 OCP\Util::addScript('files_proton', 'proton');
