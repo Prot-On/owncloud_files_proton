@@ -19,12 +19,31 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-OCP\User::checkAdminUser();
+OC_Util::checkAdminUser();
 
-OCP\Util::addScript( "apptemplate", "admin" );
+if($_POST) {
+    // CSRF check
+    OCP\JSON::callCheck();
 
-$tmpl = new OCP\Template( 'apptemplate', 'settings');
+    if(isset($_POST['proton_url'])) {
+        OC_CONFIG::setValue('user_proton_url', strip_tags($_POST['proton_url']));
+    }
+    if(isset($_POST['proton_oauth_client_id'])) {
+        OC_CONFIG::setValue('user_proton_oauth_client_id', strip_tags($_POST['proton_oauth_client_id']));
+    }
+    if(isset($_POST['proton_oauth_secret'])) {
+        OC_CONFIG::setValue('user_proton_oauth_secret', strip_tags($_POST['proton_oauth_secret']));
+    }
+    if(isset($_POST['proton_api_url'])) {
+        OC_CONFIG::setValue('user_proton_api_url', strip_tags($_POST['proton_api_url']));
+    }
+}
 
-$tmpl->assign('url', OCP\Config::getSystemValue( "somesetting", '' ));
+// fill template
+$tmpl = new OC_Template( 'files_proton', 'settings');
+$tmpl->assign( 'proton_url', OC_Config::getValue( "user_proton_url" ));
+$tmpl->assign( 'proton_oauth_client_id', OC_Config::getValue( "user_proton_oauth_client_id" ));
+$tmpl->assign( 'proton_oauth_secret', OC_Config::getValue( "user_proton_oauth_secret" ));
+$tmpl->assign( 'proton_api_url', OC_Config::getValue( "user_proton_api_url" ));
 
 return $tmpl->fetchPage();

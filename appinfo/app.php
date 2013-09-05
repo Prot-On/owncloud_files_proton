@@ -20,7 +20,14 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+ 
+ if (!in_array('curl', get_loaded_extensions())) {
+    \OCP\Util::writeLog("ProtOn", 'This app needs cUrl PHP extension', \OCP\Util::DEBUG);
+    return false;
+}
 
+include_once 'common/includes.php'; 
+ 
 OCP\App::registerAdmin( 'files_proton', 'settings' );
 OCP\Util::addScript('files_proton', 'proton');
 OCP\Util::addStyle('files_proton', 'proton');
