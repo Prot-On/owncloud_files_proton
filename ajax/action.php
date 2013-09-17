@@ -31,7 +31,7 @@ if (!is_numeric($itemSource)) { OC_JSON::error(array('msg' => 'itemSource must b
 
 switch ($action) {
     case 'view':
-        OC_JSON::success(array('redirect' => 'http://owncloud.proton.teachnova.net/dnd/view?id=' . $itemSource));
+        OC_JSON::success(array('redirect' => \OC_Config::getValue( "user_dnd_url" ) .'?url=' . urlencode($itemSource)));
         break;
     case 'protect':
         OC_JSON::success(array('redirect' => 'http://owncloud.proton.teachnova.net/dnd/protect?id=' . $itemSource));
@@ -40,10 +40,12 @@ switch ($action) {
         OC_JSON::success(array('redirect' => 'http://owncloud.proton.teachnova.net/dnd/unprotect?id=' . $itemSource));
         break;
     case 'rights':
-        OC_JSON::success(array('redirect' => 'http://owncloud.proton.teachnova.net/dnd/rights?id=' . $itemSource));
+        $docIds = \OCA\Proton\Util::getDocIds($itemSource);
+        OC_JSON::success(array('redirect' => \OC_Config::getValue( "user_proton_url" ) . 'manager.do?action=detail&xdocid=' . urlencode($docIds['xDocId'])));
         break;
     case 'activity':
-        OC_JSON::success(array('redirect' => 'http://owncloud.proton.teachnova.net/dnd/activity?id=' . $itemSource));
+        $docIds = \OCA\Proton\Util::getDocIds($itemSource);
+        OC_JSON::success(array('redirect' => \OC_Config::getValue( "user_proton_url" ) . 'showActivityForm.do?docId=' . urlencode($docIds['docId'])));
         break;
     default:
         OC_JSON::error();

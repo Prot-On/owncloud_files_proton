@@ -107,44 +107,38 @@ OC.Proton = {
         });
     },
     setActions:function() {
-        $(this).find('.proton-action-view').click(OC.Proton.actionView);
+        $(this).find('.proton-action-view').click(OC.Proton.getUrlAndRedirect('view'));
         $(this).find('.proton-action-protect').click(OC.Proton.actionProtect);
         $(this).find('.proton-action-unprotect').click(OC.Proton.actionUnprotect);
-        $(this).find('.proton-action-rights').click(OC.Proton.actionRights);
-        $(this).find('.proton-action-activity').click(OC.Proton.actionActivity);
+        $(this).find('.proton-action-rights').click(OC.Proton.getUrlAndRedirect('rights'));
+        $(this).find('.proton-action-activity').click(OC.Proton.getUrlAndRedirect('activity'));
     },
-    actionView:function(event) {
-        var itemSource = $(this).closest('#proton-dropdown').data('item-source');
-console.log('view : itemSource = ' + itemSource);
-        $.get(OC.filePath('files_proton', 'ajax', 'action.php'),
-            { action: 'view', itemSource: itemSource },
-            function(result) {
-                if (result && result.status === 'success') {
-                    window.open(result.redirect, '_blank');
-                }
-            });
-        },
     actionProtect:function(event) {
         var itemSource = $(this).closest('#proton-dropdown').data('item-source');
-console.log('protect : itemSource = ' + itemSource);
-
     },
     actionUnprotect:function(event) {
         var itemSource = $(this).closest('#proton-dropdown').data('item-source');
-console.log('unprotect : itemSource = ' + itemSource);
-
     },
-    actionRights:function(event) {
-        var itemSource = $(this).closest('#proton-dropdown').data('item-source');
-console.log('rights : itemSource = ' + itemSource);
-
-    },
-    actionActivity:function(event) {
-        var itemSource = $(this).closest('#proton-dropdown').data('item-source');
-console.log('activity : itemSource = ' + itemSource);
-
-    },
-
+    getUrlAndRedirect: function(action) {
+    	return function(event) {
+	        var itemSource = $(this).closest('#proton-dropdown').data('item-source');
+	        $.get(OC.filePath('files_proton', 'ajax', 'action.php'),
+	            { action: action, itemSource: itemSource },
+	            function(result) {
+	                if (result && result.status === 'success') {
+	                	$.fancybox({
+	                		'href'				: result.redirect,
+							'width'				: '75%',
+							'height'			: '75%',
+					        'autoScale'     	: false,
+					        'transitionIn'		: 'none',
+							'transitionOut'		: 'none',
+							'type'				: 'iframe'
+						});
+	                }
+	        });
+		};
+    }
 };
 
 $(document).ready(function(){
@@ -163,6 +157,14 @@ $(document).ready(function(){
 		});
 	});
 
+	$(this).click(function(event) {
+		var target = $(event.target);
+		var isMatched = !target.is('.drop, .ui-datepicker-next, .ui-datepicker-prev, .ui-icon')
+			&& !target.closest('#ui-datepicker-div').length;
+		if (OC.Proton.droppedDown && isMatched && $('#proton-dropdown').has(event.target).length === 0) {
+			OC.Proton.hideDropDown();
+		}
+	});
 
 
 });

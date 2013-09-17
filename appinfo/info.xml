@@ -7,4 +7,7 @@
 	<licence>AGPL</licence>
 	<author>Proteccion Online, SL - info@prot-on.com</author>
 	<require>5</require>
+	<public>
+		<files_proton>publicDnD.php</files_proton>
+	</public>	
 </info>
