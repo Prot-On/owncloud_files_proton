@@ -31,7 +31,8 @@ if (!is_numeric($itemSource)) { OC_JSON::error(array('msg' => 'itemSource must b
 
 switch ($action) {
     case 'view':
-        OC_JSON::success(array('redirect' => \OC_Config::getValue( "user_dnd_url" ) .'?url=' . urlencode($itemSource)));
+        $url = \OC_Helper::makeURLAbsolute('public.php').'?service=files_proton&file_id='.$itemSource.'&user_id='.\OC_User::getUser();
+        OC_JSON::success(array('redirect' => \OC_Config::getValue( "files_proton_dnd_url" ) .'?url=' . urlencode($url)));
         break;
     case 'protect':
         OC_JSON::success(array('redirect' => 'http://owncloud.proton.teachnova.net/dnd/protect?id=' . $itemSource));

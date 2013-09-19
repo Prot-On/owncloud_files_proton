@@ -37,13 +37,22 @@ if($_POST) {
     if(isset($_POST['proton_api_url'])) {
         OC_CONFIG::setValue('user_proton_api_url', strip_tags($_POST['proton_api_url']));
     }
+    if(isset($_POST['proton_dnd_url'])) {
+        OC_CONFIG::setValue('files_proton_dnd_url', strip_tags($_POST['proton_dnd_url']));
+    }
 }
-
 // fill template
 $tmpl = new OC_Template( 'files_proton', 'settings');
 $tmpl->assign( 'proton_url', OC_Config::getValue( "user_proton_url" ));
 $tmpl->assign( 'proton_oauth_client_id', OC_Config::getValue( "user_proton_oauth_client_id" ));
 $tmpl->assign( 'proton_oauth_secret', OC_Config::getValue( "user_proton_oauth_secret" ));
 $tmpl->assign( 'proton_api_url', OC_Config::getValue( "user_proton_api_url" ));
+$tmpl->assign( 'proton_dnd_url', OC_Config::getValue( "files_proton_dnd_url" ));
 
+$code = OC_Config::getValue( "files_proton_dnd_code" );
+if (empty($code)) {
+    $code = substr(md5(rand()),0,10);
+    OC_CONFIG::setValue('files_proton_dnd_code', $code);
+}
+$tmpl->assign( 'proton_dnd_code', $code);
 return $tmpl->fetchPage();
