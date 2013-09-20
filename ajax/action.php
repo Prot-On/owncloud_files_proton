@@ -31,7 +31,7 @@ if (!is_numeric($itemSource)) { OC_JSON::error(array('msg' => 'itemSource must b
 
 switch ($action) {
     case 'view':
-        $url = \OC_Helper::makeURLAbsolute('public.php').'?service=files_proton&file_id='.$itemSource.'&user_id='.\OC_User::getUser();
+        $url = \OC_Helper::makeURLAbsolute('/public.php').'?service=files_proton&file_id='.$itemSource.'&user_id='.\OC_User::getUser();
         OC_JSON::success(array('redirect' => \OC_Config::getValue( "files_proton_dnd_url" ) .'?url=' . urlencode($url)));
         break;
     case 'protect':
