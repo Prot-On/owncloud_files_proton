@@ -35,7 +35,7 @@
         <br />
         <br />
         <p><label for="proton_dnd_url"><?php p($l->t('Prot-On Drag and Drop URL: '));?><input type="text" id="proton_dnd_url" name="proton_dnd_url" value="<?php p($_['proton_dnd_url']); ?>" style="width:20em;" title="<?php p($l->t('Url of the Prot-On Drag and Drop server')); ?>"></label></p>
-        <p><label for="proton_dnd_code"><?php p($l->t('DnD configuration code: '));?><input type="text" name="proton_dnd_code" disabled="disabled" value="<?php p(\OC_Helper::makeURLAbsolute('').';secret;'.$_['proton_dnd_code']); ?>" style="width:30em;"></label></p>
+        <p><label for="proton_dnd_code"><?php p($l->t('DnD configuration code: '));?><input type="text" name="proton_dnd_code" disabled="disabled" value="<?php p(\OC_Request::serverHost().';secret;'.$_['proton_dnd_code']); ?>" style="width:30em;"></label></p>
         <span class="msg"><?php p($l->t('You must add this to your DnD server configuration in the url.parameters section')); ?></span>
         <br />
         

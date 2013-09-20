@@ -26,15 +26,15 @@ OC.Proton = {
     FILE_TYPE_UNSUPPORTED:3,
     fileTypes:[],
     droppedDown:false,
+	UNPROTECTED: /.*\.(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff)$/,
+    PROTECTED_DND: /.*\.proton.*?\.(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff)$/,
+    PROTECTED: /.*\.proton.*?\..+$/,
     fileTypeGet:function(fileName) {
-        var unproton = /.*\.(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff)$/;
-        var proton_dnd = /.*\.proton\.(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff)$/;
-        var proton = /.*\.proton\..+$/;
-        if (proton_dnd.test(fileName)) {
+        if (OC.Proton.PROTECTED_DND.test(fileName)) {
             return OC.Proton.FILE_TYPE_PROTECTED_DND;
-        } else if (proton.test(fileName)) {
+        } else if (OC.Proton.PROTECTED.test(fileName)) {
             return OC.Proton.FILE_TYPE_PROTECTED;
-        } else if (unproton.test(fileName)) {
+        } else if (OC.Proton.UNPROTECTED.test(fileName)) {
             return OC.Proton.FILE_TYPE_UNPROTECTED;
         }
         return OC.Proton.FILE_TYPE_UNSUPPORTED;
