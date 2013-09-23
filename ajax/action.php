@@ -5,29 +5,28 @@
  * @author Antonio Espinosa
  * @copyright 2013 Protección Online, S.L. info@prot-on.com
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
- * License as published by the Free Software Foundation; either
- * version 3 of the License, or any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU AFFERO GENERAL PUBLIC LICENSE for more details.
- *
- * You should have received a copy of the GNU Affero General Public
- * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 $action     = $_GET['action'];
 $itemSource = $_GET['itemSource'];
 $availableActions = array('view', 'protect', 'unprotect', 'rights', 'activity');
 
-if (empty($action)) { OC_JSON::error(array('msg' => 'No action selected')); die; }
+if (empty($action)) { OC_JSON::error(array('msg' => 'No action selected')); exit(); }
 if (!in_array($action, $availableActions)) { OC_JSON::error(array('msg' => 'Action is not available',
-                                                                  'availableActions' => $availableActions)); die; }
+                                                                  'availableActions' => $availableActions)); exit(); }
 if (empty($itemSource)) { OC_JSON::error(array('msg' => 'No itemSource selected')); die; }
-if (!is_numeric($itemSource)) { OC_JSON::error(array('msg' => 'itemSource must be a number')); die; }
+if (!is_numeric($itemSource)) { OC_JSON::error(array('msg' => 'itemSource must be a number')); exit(); }
 
 switch ($action) {
     case 'view':
@@ -35,10 +34,38 @@ switch ($action) {
         OC_JSON::success(array('redirect' => \OC_Config::getValue( "files_proton_dnd_url" ) .'?url=' . urlencode($url)));
         break;
     case 'protect':
-        OC_JSON::success(array('redirect' => 'http://owncloud.proton.teachnova.net/dnd/protect?id=' . $itemSource));
+        $temp = \OCA\Proton\Util::toTmpFile($itemSource);
+        $pest = \OCA\Proton\Util::getPest();
+        try {
+            $thing = $pest->post('/documents/encrypt', array('file' => '@'.$temp, 'algorithm' => 'AES128', 'return_url' => 'false'));
+        } catch (\Exception $e) {
+            \OCA\Proton\Util::log('Excepcion '.$e);
+            $l = OC_L10N::get('lib');
+            OC_JSON::error(array( 'data' => array( 'message' => $l->t('Error protecting file') )));
+            exit();
+        }
+        $path = \OC\Files\Filesystem::getPath($itemSource);
+        \OC\Files\Filesystem::file_put_contents($path, $thing);
+        $newPath = substr($path,0,strripos($path, '.')).'.proton'.substr($path,strripos($path, '.'));
+        \OC\Files\Filesystem::rename($path, $newPath);
+        OC_JSON::success(array('name' => basename ($newPath), 'size' => \OC\Files\Filesystem::filesize($newPath)));
         break;
     case 'unprotect':
-        OC_JSON::success(array('redirect' => 'http://owncloud.proton.teachnova.net/dnd/unprotect?id=' . $itemSource));
+        $temp = \OCA\Proton\Util::toTmpFile($itemSource);
+        $pest = \OCA\Proton\Util::getPest();
+        try {
+            $thing = $pest->post('/documents/decrypt', array('file' => '@'.$temp));
+        } catch (\Exception $e) {
+            \OCA\Proton\Util::log('Excepcion '.$e);
+            $l = OC_L10N::get('lib');
+            OC_JSON::error(array( 'data' => array( 'message' => $l->t('Error unprotecting file') )));
+            exit();
+        }
+        $path = \OC\Files\Filesystem::getPath($itemSource);
+        \OC\Files\Filesystem::file_put_contents($path, $thing);
+        $newPath = preg_replace("/\.proton.*?\./", ".", $path);
+        \OC\Files\Filesystem::rename($path, $newPath);
+        OC_JSON::success(array('name' => basename ($newPath), 'size' => \OC\Files\Filesystem::filesize($newPath)));
         break;
     case 'rights':
         $docIds = \OCA\Proton\Util::getDocIds($itemSource);
@@ -51,3 +78,4 @@ switch ($action) {
     default:
         OC_JSON::error();
 }
+
