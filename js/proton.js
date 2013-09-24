@@ -168,7 +168,37 @@ OC.Proton = {
 				func(result);
 			}
 		};
-    }
+    },
+    hijackDefault: function () { //Overwrite defaults for our supported files with our filter function
+		for (var i = 0; i < OC.Proton.MIMETYPES.length; ++i){
+			var mime = OC.Proton.MIMETYPES[i];
+			var name = FileActions.defaults[mime];
+			if (name) {
+				var oldDefault = FileActions.actions[mime][name]['action'];
+				var newDefault = OC.Proton.newDefaultGenerator(oldDefault);
+				FileActions.actions[mime][name]['action'] = newDefault;
+			} else {
+				var newDefault = OC.Proton.newDefaultGenerator();
+				FileActions.register(mime,'View',OC.PERMISSION_READ,'',function(filename){
+					newDefault(filename);
+				});
+				FileActions.setDefault(mime,'View');
+			}
+		}	
+	},
+	newDefaultGenerator: function (oldDefault) { //This should show or downoad protected files and download or call existing default for not protected files
+		return function(file) {
+			var type = OC.Proton.fileTypeGet(file);
+			if (type == OC.Proton.FILE_TYPE_PROTECTED_DND) {
+				var itemSource = $('tr').filterAttr('data-file', file).attr('data-id');
+				OC.Proton.getUrlAndRedirect('view', 'Error processing file')(itemSource);
+			} else if (type != OC.Proton.FILE_TYPE_PROTECTED && oldDefault) {
+				oldDefault(file);
+			} else {//No Old and protected but no DnD
+				window.location = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(file) + '&dir=' + encodeURIComponent($('#dir').val());
+			}
+		};
+	}
 };
 
 $(document).ready(function(){
@@ -178,37 +208,8 @@ $(document).ready(function(){
 			var mime = OC.Proton.MIMETYPES[i];
 	        FileActions.register(mime, 'Prot-On', OC.PERMISSION_UPDATE, OC.imagePath('files_proton', 'proton'), OC.Proton.register);
 		}
-		FileActions.register('image','View', OC.PERMISSION_READ, '',function(filename){
-			view($('#dir').val(),filename, true);
-		});
-		FileActions.setDefault('image','View');
-		var supportedMimes = new Array(
-			'application/msword', 
-			'application/msexcel',
-			'application/mspowerpoint');
-		for (var i = 0; i < supportedMimes.length; ++i){
-			var mime = supportedMimes[i];
-			FileActions.register(mime,'View',OC.PERMISSION_READ,'',function(filename){
-				view($('#dir').val(),filename, false);
-			});
-			FileActions.setDefault(mime,'View');
-		}
-		
     }
     
-   	OC.search.customResults.Images=function(row,item){
-		var image=item.link.substr(item.link.indexOf('download')+8);
-		var a=row.find('a');
-		a.attr('href','#');
-		a.click(function(){
-			image = decodeURIComponent(image);
-			var pos=image.lastIndexOf('/');
-			var file=image.substr(pos + 1);
-			var dir=image.substr(0,pos);
-			viewImage(dir,file);
-		});
-	};
-
 	$(this).click(function(event) {
 		var target = $(event.target);
 		var isMatched = !target.is('.drop, .ui-datepicker-next, .ui-datepicker-prev, .ui-icon')
@@ -217,45 +218,5 @@ $(document).ready(function(){
 			OC.Proton.hideDropDown();
 		}
 	});
+	setTimeout(hijackDefault,100);
 });
-
-function view(dir, file, image) {
-	var type = OC.Proton.fileTypeGet(file);
-	if (type == OC.Proton.FILE_TYPE_PROTECTED_DND) {
-		var itemSource = $('tr').filterAttr('data-file', file).attr('data-id');
-		OC.Proton.getUrlAndRedirect('view', 'Error processing file')(itemSource);
-		return;
-	} else if ((type == OC.Proton.FILE_TYPE_UNPROTECTED) && image){
-		if(file.indexOf('.psd') < 0){//can't view those
-			var location = fileDownloadPath(dir, file);
-			$.fancybox({
-				"href": location,
-				"title": file.replace(/</, "&lt;").replace(/>/, "&gt;"),
-				"titlePosition": "inside"
-			});
-			return;
-		}
-	}
-	window.location = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(file) + '&dir=' + encodeURIComponent($('#dir').val());
-}
-
-function hijackDefault(previous) {
-	for (var i = 0; i < OC.Proton.MIMETYPES.length; ++i){
-		var mime = OC.Proton.MIMETYPES[i];
-		var oldDefault = FileActions.actions[mime]['View']['action'] = action;
-		var newDefault = function(file) {
-			var type = OC.Proton.fileTypeGet(file);
-			if (type == OC.Proton.FILE_TYPE_PROTECTED_DND) {
-				var itemSource = $('tr').filterAttr('data-file', file).attr('data-id');
-				OC.Proton.getUrlAndRedirect('view', 'Error processing file')(itemSource);
-			} else if (type == OC.Proton.FILE_TYPE_PROTECTED) {
-				window.location = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(file) + '&dir=' + encodeURIComponent($('#dir').val());
-			} else {
-				if (oldDefault) {
-					oldDefault(file);
-				}
-			}
-		};
-		
-	}	
-}
