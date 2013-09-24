@@ -108,21 +108,24 @@ OC.Proton = {
     modifyFileContents: function(action, title) {
     	return function(event) {
     		var $tr = $(this).closest('tr');
-	        var itemSource = $(this).closest('#proton-dropdown').attr('data-item-source');
+			var path = $('#dir').val()+"/"+$tr.attr('data-file');
+    		var itemSource = $tr.attr('data-id');
 	        $.get(OC.filePath('files_proton', 'ajax', 'action.php'),
-	            { action: action, itemSource: itemSource },
+	            { action: action, itemSource: itemSource, path: path },
 	            OC.Proton.checkResult(title, function(result) {
 	            	OC.Proton.renameAndRefresh($tr, result);
     			}));
        };
     },
     getUrlAndRedirect: function(action, title) {
-    	return function(itemSource) {
-    		if (typeof itemSource == 'object') {
-    			itemSource = $(this).closest('#proton-dropdown').attr('data-item-source');
+    	return function(path, itemSource) {
+    		if (!itemSource && typeof path == 'object') {
+	    		var $tr = $(this).closest('tr');
+				var path = $('#dir').val()+"/"+$tr.attr('data-file');
+	    		var itemSource = $tr.attr('data-id');
     		}
 	        $.get(OC.filePath('files_proton', 'ajax', 'action.php'),
-	            { action: action, itemSource: itemSource },
+	            { action: action, itemSource: itemSource, path: path },
 	            OC.Proton.checkResult(title,
 		            function(result) {
 		                if (result && result.status === 'success') {
@@ -191,7 +194,8 @@ OC.Proton = {
 			var type = OC.Proton.fileTypeGet(file);
 			if (type == OC.Proton.FILE_TYPE_PROTECTED_DND) {
 				var itemSource = $('tr').filterAttr('data-file', file).attr('data-id');
-				OC.Proton.getUrlAndRedirect('view', 'Error processing file')(itemSource);
+				var path = $('#dir').val() + "/" + file;
+				OC.Proton.getUrlAndRedirect('view', 'Error processing file')(path, itemSource);
 			} else if (type != OC.Proton.FILE_TYPE_PROTECTED && oldDefault) {
 				oldDefault(file);
 			} else {//No Old and protected but no DnD

@@ -19,22 +19,22 @@
  *
  */
 $action     = $_GET['action'];
+$path = $_GET['path'];
 $itemSource = $_GET['itemSource'];
 $availableActions = array('view', 'protect', 'unprotect', 'rights', 'activity');
 
-if (empty($action)) { OC_JSON::error(array('msg' => 'No action selected')); exit(); }
-if (!in_array($action, $availableActions)) { OC_JSON::error(array('msg' => 'Action is not available',
-                                                                  'availableActions' => $availableActions)); exit(); }
-if (empty($itemSource)) { OC_JSON::error(array('msg' => 'No itemSource selected')); die; }
-if (!is_numeric($itemSource)) { OC_JSON::error(array('msg' => 'itemSource must be a number')); exit(); }
+if (empty($action)) { OC_JSON::error(array( 'data' => array( 'message' => $l->t('No action selected')))); exit(); }
+if (!in_array($action, $availableActions)) { OC_JSON::error(array( 'data' => array( 'message' => $l->t('Action is not available'),
+                                                                  'availableActions' => $availableActions))); exit(); }
+if (!$path && !$itemSource) { OC_JSON::error(array( 'data' => array( 'message' => $l->t('No file selected')))); die; }
 
 switch ($action) {
     case 'view':
-        $url = \OC_Helper::makeURLAbsolute('/public.php').'?service=files_proton&file_id='.$itemSource.'&user_id='.\OC_User::getUser();
+        $url = \OC_Helper::makeURLAbsolute('/public.php').'?service=files_proton&path='.urlencode($path).'&user_id='.urlencode(\OC_User::getUser());
         OC_JSON::success(array('redirect' => \OC_Config::getValue( "files_proton_dnd_url" ) .'?url=' . urlencode($url)));
         break;
     case 'protect':
-        $temp = \OCA\Proton\Util::toTmpFile($itemSource);
+        $temp = \OCA\Proton\Util::toTmpFilePath($path);
         $pest = \OCA\Proton\Util::getPest();
         try {
             $thing = $pest->post('/documents/encrypt', array('file' => '@'.$temp, 'algorithm' => 'AES128', 'return_url' => 'false'));
@@ -44,14 +44,13 @@ switch ($action) {
             OC_JSON::error(array( 'data' => array( 'message' => $l->t('Error protecting file') )));
             exit();
         }
-        $path = \OC\Files\Filesystem::getPath($itemSource);
         \OC\Files\Filesystem::file_put_contents($path, $thing);
         $newPath = substr($path,0,strripos($path, '.')).'.proton'.substr($path,strripos($path, '.'));
         \OC\Files\Filesystem::rename($path, $newPath);
         OC_JSON::success(array('name' => basename ($newPath), 'size' => \OC\Files\Filesystem::filesize($newPath)));
         break;
     case 'unprotect':
-        $temp = \OCA\Proton\Util::toTmpFile($itemSource);
+        $temp = \OCA\Proton\Util::toTmpFilePath($path);
         $pest = \OCA\Proton\Util::getPest();
         try {
             $thing = $pest->post('/documents/decrypt', array('file' => '@'.$temp));
@@ -61,7 +60,6 @@ switch ($action) {
             OC_JSON::error(array( 'data' => array( 'message' => $l->t('Error unprotecting file') )));
             exit();
         }
-        $path = \OC\Files\Filesystem::getPath($itemSource);
         \OC\Files\Filesystem::file_put_contents($path, $thing);
         $newPath = preg_replace("/\.proton.*?\./", ".", $path);
         \OC\Files\Filesystem::rename($path, $newPath);

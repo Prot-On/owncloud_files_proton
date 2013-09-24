@@ -26,12 +26,12 @@
 OC_App::loadApps();
 if (!is_null(\OC_Config::getValue( "files_proton_dnd_url" ))  && !is_null(\OC_Config::getValue( "files_proton_dnd_code" ))
     && isset($_GET['secret']) && $_GET['secret'] === \OC_Config::getValue( "files_proton_dnd_code" )
-    && isset($_GET['file_id']) && isset($_GET['user_id'])
+    && isset($_GET['path']) && isset($_GET['user_id'])
 ) {
-    $userId = $_GET['user_id'];
+    $userId = $_GET['path'];
     OC_Util::tearDownFS();
     OC_Util::setupFS($userId);
-    $path = \OC\Files\Filesystem::getPath($_GET['file_id']);
+    $path = $_GET['file_id'];
     if (isset($path)) {
         $dir = dirname($path);
         $file = basename($path);
