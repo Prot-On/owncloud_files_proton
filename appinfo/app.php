@@ -33,7 +33,5 @@ OCP\App::registerAdmin( 'files_proton', 'settings' );
 OCP\Util::addScript('files_proton', 'proton');
 OCP\Util::addStyle('files_proton', 'proton');
 
-OCP\Util::addscript('files_proton', 'jquery.fancybox-1.3.4.pack');
-OCP\Util::addStyle( 'files_proton', 'jquery.fancybox-1.3.4' );
 
 
