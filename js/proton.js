@@ -25,7 +25,12 @@ OC.Proton = {
     FILE_TYPE_PROTECTED_DND:1,
     FILE_TYPE_PROTECTED:2,
     FILE_TYPE_UNSUPPORTED:3,
-    fileTypes:[],
+	MIMETYPES: new Array(
+		'application/msword', 
+		'application/msexcel',
+		'application/mspowerpoint',
+		'application/pdf',
+		'image'),
     droppedDown:false,
 	UNPROTECTED: /.*\.(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff)$/,
     PROTECTED_DND: /.*\.proton.*?\.(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff)$/,
@@ -169,7 +174,10 @@ OC.Proton = {
 $(document).ready(function(){
 
     if (typeof OC.Proton !== 'undefined' && typeof FileActions !== 'undefined') {
-        FileActions.register('file', 'Prot-On', OC.PERMISSION_UPDATE, OC.imagePath('files_proton', 'proton'), OC.Proton.register);
+		for (var i = 0; i < OC.Proton.MIMETYPES.length; ++i){
+			var mime = OC.Proton.MIMETYPES[i];
+	        FileActions.register(mime, 'Prot-On', OC.PERMISSION_UPDATE, OC.imagePath('files_proton', 'proton'), OC.Proton.register);
+		}
 		FileActions.register('image','View', OC.PERMISSION_READ, '',function(filename){
 			view($('#dir').val(),filename, true);
 		});
@@ -229,4 +237,25 @@ function view(dir, file, image) {
 		}
 	}
 	window.location = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(file) + '&dir=' + encodeURIComponent($('#dir').val());
+}
+
+function hijackDefault(previous) {
+	for (var i = 0; i < OC.Proton.MIMETYPES.length; ++i){
+		var mime = OC.Proton.MIMETYPES[i];
+		var oldDefault = FileActions.actions[mime]['View']['action'] = action;
+		var newDefault = function(file) {
+			var type = OC.Proton.fileTypeGet(file);
+			if (type == OC.Proton.FILE_TYPE_PROTECTED_DND) {
+				var itemSource = $('tr').filterAttr('data-file', file).attr('data-id');
+				OC.Proton.getUrlAndRedirect('view', 'Error processing file')(itemSource);
+			} else if (type == OC.Proton.FILE_TYPE_PROTECTED) {
+				window.location = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(file) + '&dir=' + encodeURIComponent($('#dir').val());
+			} else {
+				if (oldDefault) {
+					oldDefault(file);
+				}
+			}
+		};
+		
+	}	
 }
