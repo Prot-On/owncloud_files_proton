@@ -218,5 +218,5 @@ $(document).ready(function(){
 			OC.Proton.hideDropDown();
 		}
 	});
-	setTimeout(hijackDefault,100);
+	setTimeout(OC.Proton.hijackDefault,100);
 });
