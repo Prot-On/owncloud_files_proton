@@ -70,11 +70,11 @@ OC.Proton = {
         var html = '<div id="proton-dropdown" class="drop" data-item-source="' + itemSource + '">';
         html += '<ul>';
         if (fileType == OC.Proton.FILE_TYPE_UNPROTECTED) {
-            html += '<li><a href="#" class="proton-action-protect">Proteger</a></li>';
+            html += '<li><a href="#" class="proton-action-protect">'+t('files_proton','Protect')+'</a></li>';
         } else {
-            html += '<li><a href="#" class="proton-action-rights">Gestionar permisos</a></li>';
-            html += '<li><a href="#" class="proton-action-activity">Ver actividad</a></li>';
-            html += '<li><a href="#" class="proton-action-unprotect">Desproteger</a></li>';
+            html += '<li><a href="#" class="proton-action-rights">'+t('files_proton','Manage permision')+'</a></li>';
+            html += '<li><a href="#" class="proton-action-activity">'+t('files_proton','View activity log')+'</a></li>';
+            html += '<li><a href="#" class="proton-action-unprotect">'+t('files_proton','Unprotect')+'</a></li>';
         }
         html += '</ul>';
         html += '</div>';
