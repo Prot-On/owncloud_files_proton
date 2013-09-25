@@ -33,11 +33,14 @@ if (!is_null(\OC_Config::getValue( "files_proton_dnd_url" ))  && !is_null(\OC_Co
     OC_Util::setupFS($userId);
     $oldUser = \OC_User::getUser();
     \OC_User::setUserId($userId);
+    \OCA\Proton\Util::markProtOnUser();
     $path = $_GET['path'];
     $dir = dirname($path);
     $file = basename($path);
     OC_Files::get($dir, $file, $_SERVER['REQUEST_METHOD'] == 'HEAD' ? true : false);
     \OC_User::setUserId($oldUser);
+    session_unset();
+    session_destroy();
     exit();
 }
 header('HTTP/1.0 404 Not Found');
