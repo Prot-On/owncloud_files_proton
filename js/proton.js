@@ -166,7 +166,7 @@ OC.Proton = {
     checkResult: function(title, func) {
     	return function(result) {
 			if (!result || result.status == 'error') {
-				OC.dialogs.alert(result.data.message, title);
+				OC.dialogs.alert(result.data.message, t('files_proton',title));
 			} else if (func){
 				func(result);
 			}
