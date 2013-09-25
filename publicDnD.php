@@ -31,13 +31,14 @@ if (!is_null(\OC_Config::getValue( "files_proton_dnd_url" ))  && !is_null(\OC_Co
     $userId = $_GET['user_id'];
     OC_Util::tearDownFS();
     OC_Util::setupFS($userId);
+    $oldUser = \OC_User::getUser();
+    \OC_User::setUserId($userId);
     $path = $_GET['path'];
-    if (isset($path)) {
-        $dir = dirname($path);
-        $file = basename($path);
-        OC_Files::get($dir, $file, $_SERVER['REQUEST_METHOD'] == 'HEAD' ? true : false);
-        exit();
-    }
+    $dir = dirname($path);
+    $file = basename($path);
+    OC_Files::get($dir, $file, $_SERVER['REQUEST_METHOD'] == 'HEAD' ? true : false);
+    \OC_User::setUserId($oldUser);
+    exit();
 }
 header('HTTP/1.0 404 Not Found');
 $tmpl = new OCP\Template('', '404', 'guest');
