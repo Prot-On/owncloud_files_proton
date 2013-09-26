@@ -35,7 +35,7 @@ switch ($action) {
         break;
     case 'protect':
         $temp = \OCA\Proton\Util::toTmpFilePath($path);
-        $pest = \OCA\Proton\Util::getPest();
+        $pest = getPest();
         try {
             $thing = $pest->post('/documents/encrypt', array('file' => '@'.$temp, 'algorithm' => 'AES128', 'return_url' => 'false'));
         } catch (\Exception $e) {
@@ -51,7 +51,7 @@ switch ($action) {
         break;
     case 'unprotect':
         $temp = \OCA\Proton\Util::toTmpFilePath($path);
-        $pest = \OCA\Proton\Util::getPest();
+        $pest = getPest();
         try {
             $thing = $pest->post('/documents/decrypt', array('file' => '@'.$temp));
         } catch (\Exception $e) {
@@ -66,14 +66,52 @@ switch ($action) {
         OC_JSON::success(array('name' => basename ($newPath), 'size' => \OC\Files\Filesystem::filesize($newPath)));
         break;
     case 'rights':
-        $docIds = \OCA\Proton\Util::getDocIds($itemSource);
+        $docIds = getDocIds($itemSource);
         OC_JSON::success(array('redirect' => \OC_Config::getValue( "user_proton_url" ) . 'manager.do?action=detail&xdocid=' . urlencode($docIds['xDocId'])));
         break;
     case 'activity':
-        $docIds = \OCA\Proton\Util::getDocIds($itemSource);
+        $docIds = getDocIds($itemSource);
         OC_JSON::success(array('redirect' => \OC_Config::getValue( "user_proton_url" ) . 'showActivityForm.do?docId=' . urlencode($docIds['docId'])));
         break;
     default:
         OC_JSON::error();
 }
 
+function getDocIds($itemSource) {
+    $docIds = null;
+    try {
+        $docIds = \OCA\Proton\Util::getDocIds($itemSource);
+    } catch (\Exception $e) {
+        $token = \OCA\Proton\OAuthPersist::getToken();
+        if ($token) {
+            \OCA\Proton\Util::setToken($token);
+            $docIds = \OCA\Proton\Util::getDocIds($itemSource);
+        } else {
+            OC_JSON::encodedPrint(array('oauth' => getOAuthUrl(), 'status' => 'oauth'));
+            die();
+        }
+    }
+    return $docIds;
+    
+}
+
+function getPest() {
+    $pest = null;
+    try {
+        $pest = \OCA\Proton\Util::getPest();
+    } catch (\Exception $e) {
+        $token = \OCA\Proton\OAuthPersist::getToken();
+        if ($token) {
+            \OCA\Proton\Util::setToken($token);
+            $pest = \OCA\Proton\Util::getPest();
+        } else {
+            OC_JSON::encodedPrint(array('oauth' => getOAuthUrl(), 'status' => 'oauth'));
+            die();
+        }
+    }
+    return $pest;
+}
+
+function getOAuthUrl() {
+    return \OCP\Util::linkToRoute( 'proton_files_oauth');
+}

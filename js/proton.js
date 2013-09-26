@@ -167,6 +167,9 @@ OC.Proton = {
     	return function(result) {
 			if (!result || result.status == 'error') {
 				OC.dialogs.alert(result.data.message, t('files_proton',title));
+			} else if (result.status == 'oauth'){
+				OC.Proton.hideDropDown();
+				OC.Proton.openIframe(result.oauth);
 			} else if (func){
 				func(result);
 			}
@@ -202,6 +205,25 @@ OC.Proton = {
 				window.location = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(file) + '&dir=' + encodeURIComponent($('#dir').val());
 			}
 		};
+	},
+	openIframe: function (url) {
+		$dialog = $('<div><iframe id="proton_OAuth" style="width:99%; height:99%; margin: 0 auto;"/></div>');
+		$('body').append($dialog);
+		$dialog.dialog({
+		    show: "fade",
+		    hide: "fade",
+		    modal: true,
+		    height: parseInt( $(window).height() * parseFloat(80) / 100, 10),
+		    width: parseInt( $(window).width() * parseFloat(80) / 100, 10),
+		    resizable: true,
+		    open: function (ev, ui) {
+				$('#proton_OAuth').attr('src',url);
+		    },
+		    close: function( ev, ui ) {
+		    	$dialog.remove();
+		    },
+		    title: 'Link your Prot-On account'
+		});	
 	}
 };
 
@@ -212,6 +234,7 @@ $(document).ready(function(){
 			var mime = OC.Proton.MIMETYPES[i];
 	        FileActions.register(mime, 'Prot-On', OC.PERMISSION_UPDATE, OC.imagePath('files_proton', 'proton'), OC.Proton.register);
 		}
+		setTimeout(OC.Proton.hijackDefault,100);
     }
     
 	$(this).click(function(event) {
@@ -222,5 +245,5 @@ $(document).ready(function(){
 			OC.Proton.hideDropDown();
 		}
 	});
-	setTimeout(OC.Proton.hijackDefault,100);
 });
+

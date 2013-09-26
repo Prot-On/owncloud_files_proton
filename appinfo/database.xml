@@ -36,4 +36,31 @@
     
   </declaration>
 </table>
+
+ <table>
+  <name>*dbprefix*proton_token</name>
+  <declaration>
+    <field>
+      <name>userId</name>
+      <type>text</type>
+      <notnull>true</notnull>
+      <length>255</length>
+    </field>
+    <field>
+      <name>token</name>
+      <type>text</type>
+      <notnull>true</notnull>
+      <length>500</length>
+    </field>
+    
+   <index>
+	   <name>UserIndex</name>
+	   <field>
+		   <name>userId</name>
+		   <sorting>ascending</sorting>
+	   </field>
+   </index>
+    
+  </declaration>
+</table>
 </database>
