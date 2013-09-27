@@ -32,6 +32,7 @@ OC.Proton = {
 		'application/pdf',
 		'image'),
     droppedDown:false,
+    lastAjaxCall: null,
 	UNPROTECTED: /.*\.(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff)$/,
     PROTECTED_DND: /.*\.proton.*?\.(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff)$/,
     PROTECTED: /.*\.proton.*?\..+$/,
@@ -110,36 +111,18 @@ OC.Proton = {
     		var $tr = $(this).closest('tr');
 			var path = $('#dir').val()+"/"+$tr.attr('data-file');
     		var itemSource = $tr.attr('data-id');
+    		OC.Proton.lastAjaxCall = OC.Proton.getModifyAjaxFunction(action, itemSource, path, $tr, title);
+    		OC.Proton.lastAjaxCall();
+       };
+    },
+    getModifyAjaxFunction: function (action, itemSource, path, $tr, title) {
+    	return function() {
 	        $.get(OC.filePath('files_proton', 'ajax', 'action.php'),
 	            { action: action, itemSource: itemSource, path: path },
 	            OC.Proton.checkResult(title, function(result) {
 	            	OC.Proton.renameAndRefresh($tr, result);
     			}));
-       };
-    },
-    getUrlAndRedirect: function(action, title) {
-    	return function(path, itemSource) {
-    		if (!itemSource && typeof path == 'object') {
-	    		var $tr = $(this).closest('tr');
-				var path = $('#dir').val()+"/"+$tr.attr('data-file');
-	    		var itemSource = $tr.attr('data-id');
-    		}
-	        $.get(OC.filePath('files_proton', 'ajax', 'action.php'),
-	            { action: action, itemSource: itemSource, path: path },
-	            OC.Proton.checkResult(title,
-		            function(result) {
-		                if (result && result.status === 'success') {
-		                	$.fancybox({
-		                		'href'				: result.redirect,
-								'width'				: '75%',
-								'height'			: '75%',
-								'type'				: 'iframe',
-								'autoScale'     	: false
-							});
-		                }
-	        		}
-	        ));
-		};
+    	};
     },
     renameAndRefresh: function(tr, result) {
     	var newname = result.name;
@@ -163,18 +146,69 @@ OC.Proton = {
 		}
 		OC.Proton.hideDropDown();
     },
+    getUrlAndRedirect: function(action, title) {
+    	return function(path, itemSource) {
+    		if (!itemSource && typeof path == 'object') {
+	    		var $tr = $(this).closest('tr');
+				var path = $('#dir').val()+"/"+$tr.attr('data-file');
+	    		var itemSource = $tr.attr('data-id');
+    		}
+    		OC.Proton.lastAjaxCall = OC.Proton.getAjaxUrlAndRedirect(action, itemSource, path, title);
+    		OC.Proton.lastAjaxCall();
+		};
+    },
+    getAjaxUrlAndRedirect: function(action, itemSource, path, title) {
+    	return function() {
+	        $.get(OC.filePath('files_proton', 'ajax', 'action.php'),
+	            { action: action, itemSource: itemSource, path: path },
+	            OC.Proton.checkResult(title,
+		            function(result) {
+		                if (result && result.status === 'success') {
+		                	OC.Proton.lastAjaxCall = null;
+		                	OC.Proton.hideDropDown();
+		                	OC.Proton.openIframe(result.redirect, '');
+		                }
+	        		}
+	        ));
+    	};
+    },
     checkResult: function(title, func) {
     	return function(result) {
 			if (!result || result.status == 'error') {
 				OC.dialogs.alert(result.data.message, t('files_proton',title));
 			} else if (result.status == 'oauth'){
 				OC.Proton.hideDropDown();
-				OC.Proton.openIframe(result.oauth);
+				OC.Proton.openIframe(result.oauth, t('files_proton','Link your Prot-On account'));
 			} else if (func){
 				func(result);
 			}
 		};
     },
+	openIframe: function (url, title) {
+		$dialog = $('<div><iframe id="proton_OAuth" style="width:99%; height:99%; margin: 0 auto;"/></div>');
+		$('body').append($dialog);
+		$dialog.dialog({
+		    show: "fade",
+		    hide: "fade",
+		    modal: true,
+		    height: parseInt( $(window).height() * parseFloat(80) / 100, 10),
+		    width: parseInt( $(window).width() * parseFloat(80) / 100, 10),
+		    resizable: true,
+		    open: function (ev, ui) {
+				$('#proton_OAuth').attr('src',url);
+		    },
+		    close: function( ev, ui ) {
+		    	$dialog.remove();
+		    },
+		    title: title
+		});	
+	},
+	closeIframe: function() {
+		$('#proton_OAuth').parent().dialog('close');
+		if (OC.Proton.lastAjaxCall) {
+			OC.Proton.lastAjaxCall();			
+		}
+	},
     hijackDefault: function () { //Overwrite defaults for our supported files with our filter function
 		for (var i = 0; i < OC.Proton.MIMETYPES.length; ++i){
 			var mime = OC.Proton.MIMETYPES[i];
@@ -205,25 +239,6 @@ OC.Proton = {
 				window.location = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(file) + '&dir=' + encodeURIComponent($('#dir').val());
 			}
 		};
-	},
-	openIframe: function (url) {
-		$dialog = $('<div><iframe id="proton_OAuth" style="width:99%; height:99%; margin: 0 auto;"/></div>');
-		$('body').append($dialog);
-		$dialog.dialog({
-		    show: "fade",
-		    hide: "fade",
-		    modal: true,
-		    height: parseInt( $(window).height() * parseFloat(80) / 100, 10),
-		    width: parseInt( $(window).width() * parseFloat(80) / 100, 10),
-		    resizable: true,
-		    open: function (ev, ui) {
-				$('#proton_OAuth').attr('src',url);
-		    },
-		    close: function( ev, ui ) {
-		    	$dialog.remove();
-		    },
-		    title: 'Link your Prot-On account'
-		});	
 	}
 };
 

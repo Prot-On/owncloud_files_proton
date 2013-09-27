@@ -52,6 +52,9 @@ class OAuthClient {
 			$token = Util::parseOAuthTokenResponse($response);
             Util::setToken($token);
             OAuthPersist::storeToken($token);
+            ?>
+            <html><head><script type="text/javascript">window.parent.OC.Proton.closeIframe();</script></head></html>                        
+            <?php
 		}
     }
 }
