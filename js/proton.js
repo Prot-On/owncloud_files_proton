@@ -31,11 +31,12 @@ OC.Proton = {
 		'application/mspowerpoint',
 		'application/pdf',
 		'image'),
-    droppedDown:false,
-    lastAjaxCall: null,
 	UNPROTECTED: /.*\.(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff)$/,
     PROTECTED_DND: /.*\.proton.*?\.(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff)$/,
     PROTECTED: /.*\.proton.*?\..+$/,
+    droppedDown:false,
+    lastAjaxCall: null,
+    dndEnabled: false,
     fileTypeGet:function(fileName) {
         if (OC.Proton.PROTECTED_DND.test(fileName)) {
             return OC.Proton.FILE_TYPE_PROTECTED_DND;
@@ -249,7 +250,9 @@ $(document).ready(function(){
 			var mime = OC.Proton.MIMETYPES[i];
 	        FileActions.register(mime, 'Prot-On', OC.PERMISSION_UPDATE, OC.imagePath('files_proton', 'proton'), OC.Proton.register);
 		}
-		setTimeout(OC.Proton.hijackDefault,100);
+		if (OC.Proton.dndEnabled) {
+			setTimeout(OC.Proton.hijackDefault,100);
+		}
     }
     
 	$(this).click(function(event) {

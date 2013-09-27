@@ -5,5 +5,6 @@
 "Unprotect" => "Desproteger",
 "Error processing file" => "Error procesando el fichero",
 "Error protecting file" => "Error protegiendo el fichero",
-"Error unprotecting file" => "Error desprotegiendo el fichero"
+"Error unprotecting file" => "Error desprotegiendo el fichero",
+"Link your Prot-On account" => "Asocia tu cuenta Prot-On"
 );

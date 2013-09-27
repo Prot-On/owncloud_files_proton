@@ -30,13 +30,21 @@
 include_once 'apps/files_proton/common/includes.php';
 proton_include('files_proton');
  
-OCP\App::registerAdmin( 'files_proton', 'settings' );
-OCP\Util::addScript('files_proton', 'proton');
-OCP\Util::addStyle('files_proton', 'proton');
 
 if (\OCA\Proton\Util::isOAuthConfigured()) {
     OC::$CLASSPATH['OCA\Proton\OAuthClient']='files_proton/lib/oAuthClient.php';
     OC::$CLASSPATH['OCA\Proton\OAuthPersist']='files_proton/lib/oAuthPersist.php';
-    \OCP\Util::connectHook('OCA\Proton\OAuth', 'token_renew', 'OCA\Proton\OAuthPersist', 'storeToken');
+    \OCP\Util::connectHook('OCA\Proton\OAuth', 'token_renew', 'OCA\Proton\OAuthPersist', 'storeToken');   
 }
+if (\OCA\Proton\Util::checkProtOnUser() || \OCA\Proton\Util::isOAuthConfigured()) { //If there is no oauth and the user is not a Prot-On user then it can not use Prot-On features
+    OCP\Util::addScript('files_proton', 'proton');
+    OCP\Util::addStyle('files_proton', 'proton');
+    
+    if (\OC_Config::getValue( "files_proton_dnd_url" )) {
+        OCP\Util::addScript('files_proton', 'dndEnabled');    
+    }
+     
+}
+
+OCP\App::registerAdmin( 'files_proton', 'settings' );
 
