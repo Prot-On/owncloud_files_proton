@@ -27,8 +27,10 @@
     return false;
 }
 
-include_once 'apps/files_proton/common/includes.php';
-proton_include('files_proton');
+if (!function_exists('proton_include')) {
+    include_once 'apps/files_proton/common/includes.php';
+    proton_include('files_proton');
+}
  
 
 if (\OCA\Proton\Util::isOAuthConfigured()) {
