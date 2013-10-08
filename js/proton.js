@@ -240,6 +240,21 @@ OC.Proton = {
 				window.location = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(file) + '&dir=' + encodeURIComponent($('#dir').val());
 			}
 		};
+	},
+	checkIfProtonFile: function (itemSource) {
+		var file = $('tr').filterAttr('data-id', String(itemSource)).data('file');
+		return (OC.Proton.PROTECTED.test(file));
+	},
+	parseQueryString: function(query) {
+    	query = query.split('&');
+    	if (query == "") return {};
+		var ret = {};
+    	for (var i = 0; i < query.length; ++i) {
+        	var param=query[i].split('=');
+        	if (param.length != 2) continue;
+        	ret[param[0]] = decodeURIComponent(param[1].replace(/\+/g, " "));
+    	}
+    	return ret;  	
 	}
 };
 
@@ -261,6 +276,21 @@ $(document).ready(function(){
 			&& !target.closest('#ui-datepicker-div').length;
 		if (OC.Proton.droppedDown && isMatched && $('#proton-dropdown').has(event.target).length === 0) {
 			OC.Proton.hideDropDown();
+		}
+	});
+	
+	$( document ).ajaxSuccess(function( event, xhr, settings ) {
+		if ( settings.url == OC.filePath('core', 'ajax', 'share.php')) {
+			var params = OC.Proton.parseQueryString(settings.data);
+			if ( ( params['action'] == 'email' ||
+				params['action'] == 'setExpirationDate' ) 
+				&& OC.Proton.checkIfProtonFile(params['itemSource'])
+			) {
+				data = $.parseJSON(xhr.responseText);
+				if (data && data.status == 'success') {
+					$.get(OC.filePath('files_proton', 'ajax', 'action.php'), { action: params['action'], itemSource: params['itemSource'], date: params['date'], email: params['toaddress'], link: params['link']});				
+				}
+			}
 		}
 	});
 });
