@@ -21,6 +21,10 @@ cd files_proton
 git submodule update --init --recursive
 ```
 
+Then activate the app in Owncloud app manager.
+
+**Note:** If you are using user_proton and files_proton the second application you try to activate will fail, this is due to a shared database, before installing the second one (or after trying and failing) just delete the file `xxx_proton/appinfo/database.xml` of the application not activated.
+
 ## Configuration
 
 This app offers only 3 configurations:
