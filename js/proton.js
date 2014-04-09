@@ -2,7 +2,8 @@
  * ownCloud - ProtOn files plugin
  *
  * @author Antonio Espinosa
- * @copyright 2013 Protección Online, S.L. info@prot-on.com
+ * @author Ramiro Aparicio
+ * @copyright 2014 Protección Online, S.L. info@prot-on.com
  *
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +35,7 @@ OC.Proton = {
 		'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 		'application/pdf',
 		'text/plain',
-		'application/xml'
+		'application/xml',
 		'image'),
 	UNPROTECTED: /.*\.(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff|xml|txt)$/,
     PROTECTED_DND: /.*\.proton.*?\.(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff|xml|txt)$/,
