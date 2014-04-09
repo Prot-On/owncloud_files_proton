@@ -44,7 +44,7 @@ $itemSource = isset($_GET['itemSource'])?$_GET['itemSource']:null;
 
 switch ($action) {
     case 'view':
-        $url = \OC_Helper::makeURLAbsolute('/public.php').'?service=files_proton&path='.urlencode($path).'&user_id='.urlencode(\OC_User::getUser());
+		$url = \OC_Helper::linkToPublic('files_proton').'&path='.urlencode($path).'&user_id='.urlencode(\OC_User::getUser());
         OC_JSON::success(array('redirect' => \OC_Config::getValue( "files_proton_dnd_url" ) .'?url=' . urlencode($url)));
         break;
     case 'protect':
