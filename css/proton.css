@@ -1,8 +1,8 @@
 /**
  * ownCloud - ProtOn files plugin
  *
- * @author Antonio Espinosa
- * @copyright 2013 ProtecciÃ³n Online, S.L. info@prot-on.com
+ * @author Santiago Cuenca
+ * @copyright 2015 Protección Online, S.L. info@prot-on.com
  *
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,15 +21,52 @@
  */
 
 #proton-dropdown {
-    background:#eee;
-    border-bottom-left-radius:1em;
-    border-bottom-right-radius:1em;
-    box-shadow:0 1px 1px #777;
-    display:block;
-    margin-right:10em;
-    position:absolute;
-    right:0;
-    width:10em;
-    z-index:500;
-    padding:1em;
+	display: block;
+	position: absolute;
+	margin-right: 3em;
+    right: 0;
+	width: 15em;
+    background: #eee;
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+    box-shadow: 0 1px 1px #777;
+    z-index: 500;
  }
+
+#proton-dropdown ul {
+	margin: 0;
+	padding: .5em 0;
+}
+
+#proton-dropdown ul li {
+	padding: .25em 1em;
+}
+
+#proton-dropdown ul li a {
+	cursor: pointer !important;	
+}
+
+#proton-dropdown ul li:hover:after {
+	position: absolute;
+	right: 1em;
+	content: "<<<";
+}
+
+#proton-dropdown ul li:hover {
+	font-weight: bold;
+}
+
+/* general styles for the content area */
+.section {
+	display: block;
+	padding: 30px;
+	color: #555;
+	border-top: 1px solid #ddd;
+}
+.section h2 {
+	font-size: 20px;
+	margin-bottom: 7px;
+}
+.section h3 {
+	font-size: 16px;
+}
