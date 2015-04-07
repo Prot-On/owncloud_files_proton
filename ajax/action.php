@@ -3,6 +3,7 @@
  * ownCloud - ProtOn files plugin
  *
  * @author Antonio Espinosa
+ * @author Santiago Cuenca Lizcano
  * @copyright 2013 Protección Online, S.L. info@prot-on.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,7 +45,18 @@ $itemSource = isset($_GET['itemSource'])?$_GET['itemSource']:null;
 
 switch ($action) {
     case 'view':
-		$url = \OC_Helper::linkToPublic('files_proton').'&path='.urlencode($path).'&user_id='.urlencode(\OC_User::getUser());
+    	$owner_id = \OC\Files\Filesystem::getOwner($path);
+	
+		if ( $owner_id != \OCP\User::getUser() ) {
+			$datadir = \OC_Config::getValue( "datadirectory", \OC::$SERVERROOT."/data" );
+			\OC\Files\Filesystem::mount( '\OC\Files\Storage\Local', array('datadir'=>$datadir), '/'.$owner_id );
+			$info = \OC\Files\Filesystem::getFileInfo($path);
+			
+			// Replace "files" in path with an empty string			
+			$path = substr($info['path'], 6);
+		}
+
+		$url = \OC_Helper::linkToPublic('files_proton').'&path='.urlencode($path).'&user_id='.urlencode($owner_id);
         OC_JSON::success(array('redirect' => \OC_Config::getValue( "files_proton_dnd_url" ) .'?url=' . urlencode($url)));
         break;
     case 'protect':
