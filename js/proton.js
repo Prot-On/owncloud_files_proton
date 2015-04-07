@@ -34,12 +34,30 @@ OC.Proton = {
 		'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 		'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 		'application/pdf',
-		'text/plain',
+		'text',
 		'application/xml',
-		'image'),
-	UNPROTECTED: /.*\.(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff|xml|txt)$/,
-    PROTECTED_DND: /.*\.proton.*?\.(docx|xlsx|pptx|pdf|jpg|png|gif|bmp|tiff|xml|txt)$/,
-    PROTECTED: /.*\.proton.*?\..+$/,
+		'bitmap',
+		'image/bmp',
+		'image/x-ms-bmp',
+		'image',	
+		'image/bmp',
+		'image/bitmap',
+		'image/x-bmp',
+		'image/x-bitmap',
+		'image/x-xbitmap',
+		'image/x-win-bitmap',
+		'image/x-windows-bmp',
+		'image/ms-bmp',
+		'image/x-ms-bmp',
+		'application/bmp',
+		'application/x-bmp',
+		'application/x-win-bitmap',
+		'image/tiff',
+		'image/x-tif',
+		'image/x-tiff'),
+	UNPROTECTED: /.*\.(docx|xls|xlsx|pptx|pdf|jpg|png|gif|bmp|tif|tiff|xml|txt)$/i,
+    PROTECTED_DND: /.*\.proton.*?\.(docx|xls|xlsx|pptx|pdf|jpg|png|gif|bmp|tif|tiff|xml|txt)$/i,
+    PROTECTED: /.*\.proton.*?\..+$/i,
     droppedDown:false,
     lastAjaxCall: null,
     dndEnabled: false,
@@ -216,25 +234,55 @@ OC.Proton = {
 			OC.Proton.lastAjaxCall();			
 		}
 	},
-    hijackDefault: function () { //Overwrite defaults for our supported files with our filter function
+	hijackDefault: function () { //Overwrite defaults for our supported files with our filter function
 		for (var i = 0; i < OC.Proton.MIMETYPES.length; ++i){
 			var mime = OC.Proton.MIMETYPES[i];
 			var name = FileActions.defaults[mime];
+			var oldDefault = Array();
 			if (name) {
-				var oldDefault = FileActions.actions[mime][name]['action'];
-				var newDefault = OC.Proton.newDefaultGenerator(oldDefault);
+				oldDefault[mime] = FileActions.actions[mime][name]['action'];
+				var newDefault = OC.Proton.newDefaultGenerator(oldDefault[mime]);
 				FileActions.actions[mime][name]['action'] = newDefault;
 			} else {
 				var newDefault = OC.Proton.newDefaultGenerator();
-				FileActions.register(mime,'View',OC.PERMISSION_READ,'',function(filename){
-					newDefault(filename);
+				FileActions.register(mime,'View',OC.PERMISSION_READ,'',function(file){
+					//newDefault(file);
+					var type = OC.Proton.fileTypeGet(file);
+					
+					// If protected and supported by DND
+					if (type == OC.Proton.FILE_TYPE_PROTECTED_DND) {
+
+						var itemSource = $('tr').filterAttr('data-file', file).attr('data-id');
+						var path = $('#dir').val() + "/" + file;
+						OC.Proton.getUrlAndRedirect('view', 'Error processing file')(path, itemSource);
+					
+					// If protected but not supported by DND
+					} else if (type == OC.Proton.FILE_TYPE_PROTECTED) {
+
+						window.location = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(file) + '&dir=' + encodeURIComponent($('#dir').val());
+					
+					// Not protected or unsupported types
+					} else {
+						
+						var mimetype = OC.MimeType;
+						var mime = mimetype.lookup(file);
+						//alert(mime);
+
+						if(oldDefault[mime]){
+							oldDefault[mime](file);
+						} else {
+							window.location = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(file) + '&dir=' + encodeURIComponent($('#dir').val());
+						}
+
+					}
 				});
 				FileActions.setDefault(mime,'View');
 			}
-		}	
+		}
 	},
 	newDefaultGenerator: function (oldDefault) { //This should show or downoad protected files and download or call existing default for not protected files
 		return function(file) {
+                        var mime = OC.MimeType.lookup(file);
 			var type = OC.Proton.fileTypeGet(file);
 			if (type == OC.Proton.FILE_TYPE_PROTECTED_DND) {
 				var itemSource = $('tr').filterAttr('data-file', file).attr('data-id');
@@ -245,6 +293,7 @@ OC.Proton = {
 			} else {//No Old and protected but no DnD
 				window.location = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(file) + '&dir=' + encodeURIComponent($('#dir').val());
 			}
+			
 		};
 	},
 	checkIfProtonFile: function (itemSource) {
