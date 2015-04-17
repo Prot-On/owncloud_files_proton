@@ -40,6 +40,7 @@ if (\OCA\Proton\Util::isOAuthConfigured()) {
 }
 if (\OCA\Proton\Util::checkProtOnUser() || \OCA\Proton\Util::isOAuthConfigured()) { //If there is no oauth and the user is not a Prot-On user then it can not use Prot-On features
     OCP\Util::addScript('files_proton', 'proton');
+    OCP\Util::addSCript('files_proton', 'mimetype');
     OCP\Util::addStyle('files_proton', 'proton');
     
     if (\OC_Config::getValue( "files_proton_dnd_url" )) {
