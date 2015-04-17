@@ -27,9 +27,6 @@ OC.Proton = {
     FILE_TYPE_PROTECTED:2,
     FILE_TYPE_UNSUPPORTED:3,
 	MIMETYPES: new Array(
-		'application/msword', 
-		'application/msexcel',
-		'application/mspowerpoint',
 		'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 		'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 		'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
